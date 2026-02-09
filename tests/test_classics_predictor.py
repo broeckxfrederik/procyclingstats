@@ -638,6 +638,7 @@ class TestPredictionPipeline:
             "recent_form", "classic_pedigree", "specialty_score",
             "age_distance_fit", "previous_year", "preparation",
             "injury_penalty", "terrain_match", "sprint_capability",
+            "uphill_sprint", "cobble_capability",
             "momentum", "team_strength",
         }
         assert set(p["features"].keys()) == expected_features
@@ -745,6 +746,8 @@ class TestExplain:
                 "injury_penalty": 1.0,
                 "terrain_match": 0.75,
                 "sprint_capability": 0.60,
+                "uphill_sprint": 0.65,
+                "cobble_capability": 0.55,
                 "momentum": 0.70,
                 "team_strength": 0.80,
             },
@@ -755,6 +758,8 @@ class TestExplain:
         assert "Recent form" in explanation
         assert "Age-distance" in explanation
         assert "Terrain-rider match" in explanation
+        assert "Uphill sprint" in explanation
+        assert "Cobble capability" in explanation
         assert "Team strength" in explanation
 
 
@@ -860,6 +865,173 @@ class TestSprintCapabilityScore:
         meta = CLASSICS_METADATA["race/la-fleche-wallone"]
         score = self.predictor._score_sprint_capability(profile, meta)
         assert score > 0.9  # Basically all punch, sprint_prob=0
+
+
+class TestUphillSprintScore:
+    """Test uphill sprint (puncheur) scoring."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+
+    def test_climber_high_in_fleche(self):
+        """A climber/puncheur should score very high for Flèche Wallonne
+        (uphill_finish_prob=0.95, Mur de Huy)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 3000, "climber": 4000,
+                "gc": 3000, "sprint": 200, "time_trial": 500,
+            }
+        }
+        meta = CLASSICS_METADATA["race/la-fleche-wallone"]
+        score = self.predictor._score_uphill_sprint(profile, meta)
+        assert score > 0.85
+
+    def test_pure_sprinter_lower_than_puncheur_in_fleche(self):
+        """A pure flat sprinter should score much lower than a puncheur
+        for Flèche Wallonne."""
+        sprinter = {
+            "points_per_speciality": {
+                "one_day_races": 800, "climber": 50,
+                "gc": 50, "sprint": 3000, "time_trial": 200,
+            }
+        }
+        puncheur = {
+            "points_per_speciality": {
+                "one_day_races": 3000, "climber": 4000,
+                "gc": 3000, "sprint": 200, "time_trial": 500,
+            }
+        }
+        meta = CLASSICS_METADATA["race/la-fleche-wallone"]
+        sprinter_score = self.predictor._score_uphill_sprint(sprinter, meta)
+        puncheur_score = self.predictor._score_uphill_sprint(puncheur, meta)
+        assert puncheur_score > sprinter_score + 0.15
+
+    def test_climber_beats_sprinter_uphill(self):
+        """For uphill finishes, a climber should outscore a sprinter."""
+        climber = {
+            "points_per_speciality": {
+                "one_day_races": 2000, "climber": 3000,
+                "gc": 2000, "sprint": 100,
+            }
+        }
+        sprinter = {
+            "points_per_speciality": {
+                "one_day_races": 1000, "climber": 50,
+                "gc": 50, "sprint": 3000,
+            }
+        }
+        meta = CLASSICS_METADATA["race/la-fleche-wallone"]
+        assert (self.predictor._score_uphill_sprint(climber, meta) >
+                self.predictor._score_uphill_sprint(sprinter, meta))
+
+    def test_uphill_irrelevant_for_roubaix(self):
+        """For Roubaix (uphill_finish_prob=0.0), both should score on
+        generic one-day ability."""
+        climber = {
+            "points_per_speciality": {
+                "one_day_races": 2000, "climber": 4000, "gc": 3000,
+            }
+        }
+        meta = CLASSICS_METADATA["race/paris-roubaix"]
+        score = self.predictor._score_uphill_sprint(climber, meta)
+        # Should be based entirely on one_day pts, not climber pts
+        one_day_only = {
+            "points_per_speciality": {"one_day_races": 2000}
+        }
+        score_generic = self.predictor._score_uphill_sprint(one_day_only, meta)
+        # Both should be similar since uphill_prob=0.0
+        assert abs(score - score_generic) < 0.01
+
+
+class TestCobbleCapabilityScore:
+    """Test cobblestone race capability scoring."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+
+    def test_power_rider_high_in_roubaix(self):
+        """A high TT + one_day rider should score well for Roubaix
+        (cobble_difficulty=1.0)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 4000, "time_trial": 2500,
+                "sprint": 800, "climber": 100,
+            }
+        }
+        meta = CLASSICS_METADATA["race/paris-roubaix"]
+        score = self.predictor._score_cobble_capability(profile, meta)
+        assert score > 0.85
+
+    def test_pure_climber_lower_than_cobble_rider_in_roubaix(self):
+        """A pure climber should score much lower than a cobble specialist
+        for Roubaix."""
+        climber = {
+            "points_per_speciality": {
+                "one_day_races": 800, "time_trial": 200,
+                "sprint": 100, "climber": 4000, "gc": 3000,
+            }
+        }
+        cobble_rider = {
+            "points_per_speciality": {
+                "one_day_races": 4000, "time_trial": 2500,
+                "sprint": 800, "climber": 100,
+            }
+        }
+        meta = CLASSICS_METADATA["race/paris-roubaix"]
+        climber_score = self.predictor._score_cobble_capability(climber, meta)
+        cobble_score = self.predictor._score_cobble_capability(cobble_rider, meta)
+        assert cobble_score > climber_score + 0.15
+
+    def test_cobble_rider_beats_climber_on_cobbles(self):
+        """A cobble specialist should outscore a climber for Roubaix."""
+        cobble_rider = {
+            "points_per_speciality": {
+                "one_day_races": 3500, "time_trial": 2000,
+                "sprint": 500, "climber": 100,
+            }
+        }
+        climber = {
+            "points_per_speciality": {
+                "one_day_races": 1000, "time_trial": 300,
+                "sprint": 100, "climber": 3500, "gc": 2500,
+            }
+        }
+        meta = CLASSICS_METADATA["race/paris-roubaix"]
+        assert (self.predictor._score_cobble_capability(cobble_rider, meta) >
+                self.predictor._score_cobble_capability(climber, meta))
+
+    def test_cobble_irrelevant_for_lbl(self):
+        """For LBL (cobble_difficulty=0.0), cobble specialization doesn't matter."""
+        cobble_rider = {
+            "points_per_speciality": {
+                "one_day_races": 2000, "time_trial": 2500, "sprint": 500,
+            }
+        }
+        meta = CLASSICS_METADATA["race/liege-bastogne-liege"]
+        score = self.predictor._score_cobble_capability(cobble_rider, meta)
+        # Should be based entirely on one_day pts
+        one_day_only = {
+            "points_per_speciality": {"one_day_races": 2000}
+        }
+        score_generic = self.predictor._score_cobble_capability(one_day_only, meta)
+        assert abs(score - score_generic) < 0.01
+
+    def test_moderate_cobble_race(self):
+        """For Dwars door Vlaanderen (cobble_difficulty=0.5), both cobble and
+        one-day ability should matter."""
+        meta = CLASSICS_METADATA["race/dwars-door-vlaanderen"]
+        strong_cobble = {
+            "points_per_speciality": {
+                "one_day_races": 3000, "time_trial": 2500, "sprint": 500,
+            }
+        }
+        weak_cobble = {
+            "points_per_speciality": {
+                "one_day_races": 3000, "time_trial": 200, "sprint": 100,
+            }
+        }
+        assert (self.predictor._score_cobble_capability(strong_cobble, meta) >
+                self.predictor._score_cobble_capability(weak_cobble, meta))
 
 
 class TestMomentumScore:

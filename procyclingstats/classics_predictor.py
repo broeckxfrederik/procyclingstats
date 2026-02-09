@@ -60,17 +60,19 @@ class TerrainType(Enum):
 # (Strade Bianche through Liège-Bastogne-Liège).
 # Weights sum to 1.0. Adjust to shift emphasis.
 DEFAULT_WEIGHTS = {
-    "classic_pedigree": 0.35,
+    "classic_pedigree": 0.15,
     "terrain_match": 0.15,
-    "previous_year": 0.15,
+    "uphill_sprint": 0.12,
+    "cobble_capability": 0.12,
     "sprint_capability": 0.08,
-    "specialty_score": 0.05,
-    "preparation": 0.05,
-    "injury_penalty": 0.042,
-    "team_strength": 0.042,
-    "momentum": 0.034,
-    "recent_form": 0.025,
-    "age_distance_fit": 0.025,
+    "team_strength": 0.059,
+    "preparation": 0.053,
+    "previous_year": 0.05,
+    "specialty_score": 0.046,
+    "injury_penalty": 0.046,
+    "recent_form": 0.046,
+    "momentum": 0.046,
+    "age_distance_fit": 0.033,
 }
 
 # Known classics with metadata for the prediction model.
@@ -84,6 +86,8 @@ CLASSICS_METADATA = {
         "name": "Milano-Sanremo",
         "sprint_finish_prob": 0.65,
         "climbing_difficulty": 0.2,
+        "uphill_finish_prob": 0.15,  # Poggio is selective but often a sprint
+        "cobble_difficulty": 0.0,
     },
     "race/ronde-van-vlaanderen": {
         "type": ClassicType.MONUMENT,
@@ -93,6 +97,8 @@ CLASSICS_METADATA = {
         "name": "Ronde van Vlaanderen",
         "sprint_finish_prob": 0.1,
         "climbing_difficulty": 0.5,
+        "uphill_finish_prob": 0.3,   # Oude Kwaremont/Paterberg selective
+        "cobble_difficulty": 0.8,    # Major cobble race
     },
     "race/paris-roubaix": {
         "type": ClassicType.MONUMENT,
@@ -102,6 +108,8 @@ CLASSICS_METADATA = {
         "name": "Paris-Roubaix",
         "sprint_finish_prob": 0.15,
         "climbing_difficulty": 0.05,
+        "uphill_finish_prob": 0.0,   # Flat velodrome finish
+        "cobble_difficulty": 1.0,    # The cobble race
     },
     "race/liege-bastogne-liege": {
         "type": ClassicType.MONUMENT,
@@ -111,6 +119,8 @@ CLASSICS_METADATA = {
         "name": "Liège-Bastogne-Liège",
         "sprint_finish_prob": 0.05,
         "climbing_difficulty": 0.85,
+        "uphill_finish_prob": 0.5,   # Often decided on final climbs
+        "cobble_difficulty": 0.0,
     },
     "race/il-lombardia": {
         "type": ClassicType.MONUMENT,
@@ -120,6 +130,8 @@ CLASSICS_METADATA = {
         "name": "Il Lombardia",
         "sprint_finish_prob": 0.05,
         "climbing_difficulty": 0.8,
+        "uphill_finish_prob": 0.5,   # San Fermo della Battaglia
+        "cobble_difficulty": 0.0,
     },
     "race/strade-bianche": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -129,6 +141,8 @@ CLASSICS_METADATA = {
         "name": "Strade Bianche",
         "sprint_finish_prob": 0.1,
         "climbing_difficulty": 0.6,
+        "uphill_finish_prob": 0.7,   # Piazza del Campo uphill sprint
+        "cobble_difficulty": 0.1,    # Gravel roads, not pavé
     },
     "race/e3-harelbeke": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -138,6 +152,8 @@ CLASSICS_METADATA = {
         "name": "E3 Saxo Classic",
         "sprint_finish_prob": 0.15,
         "climbing_difficulty": 0.35,
+        "uphill_finish_prob": 0.2,   # Paterberg/Taaienberg selective
+        "cobble_difficulty": 0.6,    # Significant cobble sections
     },
     "race/gent-wevelgem": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -147,6 +163,8 @@ CLASSICS_METADATA = {
         "name": "Gent-Wevelgem",
         "sprint_finish_prob": 0.6,
         "climbing_difficulty": 0.2,
+        "uphill_finish_prob": 0.1,   # Kemmelberg selective but flat finish
+        "cobble_difficulty": 0.4,    # Some cobble sectors
     },
     "race/amstel-gold-race": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -156,6 +174,8 @@ CLASSICS_METADATA = {
         "name": "Amstel Gold Race",
         "sprint_finish_prob": 0.2,
         "climbing_difficulty": 0.55,
+        "uphill_finish_prob": 0.6,   # Cauberg finish, often small group sprint
+        "cobble_difficulty": 0.0,
     },
     "race/la-fleche-wallone": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -165,6 +185,8 @@ CLASSICS_METADATA = {
         "name": "La Flèche Wallonne",
         "sprint_finish_prob": 0.0,
         "climbing_difficulty": 0.75,
+        "uphill_finish_prob": 0.95,  # Mur de Huy — the uphill sprint
+        "cobble_difficulty": 0.0,
     },
     "race/san-sebastian": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -174,6 +196,8 @@ CLASSICS_METADATA = {
         "name": "Clásica San Sebastián",
         "sprint_finish_prob": 0.1,
         "climbing_difficulty": 0.7,
+        "uphill_finish_prob": 0.4,
+        "cobble_difficulty": 0.0,
     },
     "race/dwars-door-vlaanderen": {
         "type": ClassicType.SEMI_CLASSIC,
@@ -183,6 +207,8 @@ CLASSICS_METADATA = {
         "name": "Dwars door Vlaanderen",
         "sprint_finish_prob": 0.2,
         "climbing_difficulty": 0.3,
+        "uphill_finish_prob": 0.2,
+        "cobble_difficulty": 0.5,    # Significant cobble sections
     },
     "race/brabantse-pijl": {
         "type": ClassicType.SEMI_CLASSIC,
@@ -192,6 +218,8 @@ CLASSICS_METADATA = {
         "name": "Brabantse Pijl",
         "sprint_finish_prob": 0.15,
         "climbing_difficulty": 0.5,
+        "uphill_finish_prob": 0.4,
+        "cobble_difficulty": 0.0,
     },
     "race/kuurne-brussel-kuurne": {
         "type": ClassicType.SEMI_CLASSIC,
@@ -201,6 +229,8 @@ CLASSICS_METADATA = {
         "name": "Kuurne-Brussel-Kuurne",
         "sprint_finish_prob": 0.8,
         "climbing_difficulty": 0.1,
+        "uphill_finish_prob": 0.0,
+        "cobble_difficulty": 0.1,
     },
 }
 
@@ -453,6 +483,12 @@ class ClassicsPredictor:
             profile, terrain, race_meta
         )
         features["sprint_capability"] = self._score_sprint_capability(
+            profile, race_meta
+        )
+        features["uphill_sprint"] = self._score_uphill_sprint(
+            profile, race_meta
+        )
+        features["cobble_capability"] = self._score_cobble_capability(
             profile, race_meta
         )
         features["momentum"] = self._score_momentum(results, race_date)
@@ -876,6 +912,102 @@ class ClassicsPredictor:
         return sprint_score * sprint_prob + punch_score * (1.0 - sprint_prob)
 
     @staticmethod
+    def _score_uphill_sprint(
+        profile: Dict[str, Any],
+        race_meta: Dict[str, Any],
+    ) -> float:
+        """
+        Score uphill sprint (puncheur) ability for races with uphill finishes.
+
+        Races like La Flèche Wallonne (Mur de Huy), Strade Bianche, and
+        Amstel Gold Race reward riders who can sprint uphill — a blend of
+        climbing explosiveness and one-day punch. This is fundamentally
+        different from flat sprint ability: Pogačar, Pidcock, and Vauquelin
+        thrive here, not Philipsen or Merlier.
+
+        The score scales with ``uphill_finish_prob`` from race metadata.
+        For flat races (Roubaix, Kuurne), this feature stays neutral.
+        """
+        uphill_prob = race_meta.get("uphill_finish_prob", 0.2)
+        specialties = profile.get("points_per_speciality", {})
+        climber_pts = specialties.get("climber", 0)
+        one_day_pts = specialties.get("one_day_races", 0)
+        gc_pts = specialties.get("gc", 0)
+
+        # Puncheur score: explosive climbing + one-day ability
+        # Climber pts are weighted highest because uphill sprints favor
+        # riders with raw climbing power who can accelerate on gradients.
+        # GC contributes because GC riders tend to have the sustained
+        # power to survive uphill finishes.
+        raw = climber_pts * 0.45 + one_day_pts * 0.35 + gc_pts * 0.20
+        ref = 4000.0
+
+        if raw <= 0:
+            puncheur_score = 0.0
+        else:
+            puncheur_score = math.log1p(raw) / math.log1p(ref)
+            puncheur_score = min(1.0, puncheur_score)
+
+        # Generic one-day ability as fallback for non-uphill races
+        if one_day_pts > 0:
+            generic_score = math.log1p(one_day_pts) / math.log1p(ref)
+            generic_score = min(1.0, generic_score)
+        else:
+            generic_score = 0.0
+
+        # Blend: in uphill finishes, puncheur ability dominates;
+        # in flat finishes, falls back to generic one-day ability
+        return puncheur_score * uphill_prob + generic_score * (1.0 - uphill_prob)
+
+    @staticmethod
+    def _score_cobble_capability(
+        profile: Dict[str, Any],
+        race_meta: Dict[str, Any],
+    ) -> float:
+        """
+        Score cobblestone race capability.
+
+        Cobble classics (Paris-Roubaix, Ronde, E3, Dwars) reward a very
+        specific rider profile: high sustained power (TT points), one-day
+        endurance, and the build/handling to survive rough surfaces. This
+        is its own specialty — pure TT riders or pure climbers don't
+        necessarily handle cobbles well.
+
+        The cobble score blends TT and one-day points, applied proportionally
+        to ``cobble_difficulty`` from race metadata. For non-cobble races
+        (LBL, Flèche), this feature stays neutral.
+        """
+        cobble_diff = race_meta.get("cobble_difficulty", 0.0)
+        specialties = profile.get("points_per_speciality", {})
+        one_day_pts = specialties.get("one_day_races", 0)
+        tt_pts = specialties.get("time_trial", 0)
+        sprint_pts = specialties.get("sprint", 0)
+
+        # Cobble ability: power (TT) + endurance (one_day) + some sprint
+        # TT riders have the raw wattage to push through cobbles.
+        # One-day riders have the tactical and endurance ability.
+        # Sprint contributes slightly for the group sprint scenarios.
+        raw = one_day_pts * 0.45 + tt_pts * 0.40 + sprint_pts * 0.15
+        ref = 4000.0
+
+        if raw <= 0:
+            cobble_score = 0.0
+        else:
+            cobble_score = math.log1p(raw) / math.log1p(ref)
+            cobble_score = min(1.0, cobble_score)
+
+        # Generic one-day ability as fallback for non-cobble races
+        if one_day_pts > 0:
+            generic_score = math.log1p(one_day_pts) / math.log1p(ref)
+            generic_score = min(1.0, generic_score)
+        else:
+            generic_score = 0.0
+
+        # Blend: in cobble races, cobble ability dominates;
+        # in non-cobble races, falls back to generic one-day ability
+        return cobble_score * cobble_diff + generic_score * (1.0 - cobble_diff)
+
+    @staticmethod
     def _score_momentum(
         results: List[Dict[str, Any]],
         race_date: date,
@@ -1090,7 +1222,9 @@ class ClassicsPredictor:
             "preparation": "Season preparation",
             "injury_penalty": "Injury/fitness indicator",
             "terrain_match": "Terrain-rider match",
-            "sprint_capability": "Sprint capability",
+            "sprint_capability": "Sprint capability (flat)",
+            "uphill_sprint": "Uphill sprint (puncheur)",
+            "cobble_capability": "Cobble capability",
             "momentum": "Form momentum",
             "team_strength": "Team strength",
         }
