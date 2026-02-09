@@ -1,6 +1,7 @@
 import os
 import sys
 
+from .classics_predictor import ClassicsPredictor
 from .race_climbs_scraper import RaceClimbs
 from .race_scraper import Race
 from .race_startlist_scraper import RaceStartlist
@@ -12,6 +13,7 @@ from .stage_scraper import Stage
 from .team_scraper import Team
 
 __all__ = [
+    "ClassicsPredictor",
     "Scraper",
     "RaceClimbs",
     "Race",
