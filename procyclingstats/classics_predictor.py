@@ -56,15 +56,17 @@ class TerrainType(Enum):
 
 
 # Default feature weights for the prediction model.
+# Calibrated against the 2025 spring classics season
+# (Strade Bianche through Liège-Bastogne-Liège).
 # Weights sum to 1.0. Adjust to shift emphasis.
 DEFAULT_WEIGHTS = {
-    "recent_form": 0.25,
-    "classic_pedigree": 0.20,
+    "classic_pedigree": 0.35,
+    "previous_year": 0.16,
     "specialty_score": 0.15,
-    "age_distance_fit": 0.15,
-    "previous_year": 0.10,
-    "preparation": 0.10,
-    "injury_penalty": 0.05,
+    "preparation": 0.14,
+    "injury_penalty": 0.10,
+    "recent_form": 0.05,
+    "age_distance_fit": 0.05,
 }
 
 # Known classics with metadata for the prediction model.
