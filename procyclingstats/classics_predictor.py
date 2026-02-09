@@ -75,6 +75,31 @@ DEFAULT_WEIGHTS = {
     "age_distance_fit": 0.033,
 }
 
+# Race-specific weight overrides for races whose characteristics
+# differ enough from the general model to benefit from tuning.
+# Weights are normalized at runtime, so they don't need to sum to 1.0.
+RACE_WEIGHT_OVERRIDES = {
+    # Gent-Wevelgem: despite the Kemmelberg, this is fundamentally a
+    # sprinters' classic. 60%+ of editions end in a bunch sprint. The
+    # general model under-ranks sprint specialists (Merlier, Kristoff,
+    # Girmay) while over-ranking pure puncheurs (Pogačar, Evenepoel).
+    "race/gent-wevelgem": {
+        "sprint_capability": 0.35,
+        "classic_pedigree": 0.25,
+        "cobble_capability": 0.15,
+        "terrain_match": 0.10,
+        "previous_year": 0.03,
+        "recent_form": 0.022,
+        "momentum": 0.019,
+        "team_strength": 0.019,
+        "preparation": 0.017,
+        "specialty_score": 0.014,
+        "injury_penalty": 0.012,
+        "uphill_sprint": 0.010,
+        "age_distance_fit": 0.007,
+    },
+}
+
 # Known classics with metadata for the prediction model.
 # Keys are the PCS race base URL (without year).
 CLASSICS_METADATA = {
@@ -496,8 +521,18 @@ class ClassicsPredictor:
                 rdata, base_url, terrain, race_distance, race_date, year
             )
 
+            # Use race-specific weights if available, else default
+            race_overrides = RACE_WEIGHT_OVERRIDES.get(base_url)
+            if race_overrides:
+                ow_total = sum(race_overrides.values())
+                scoring_weights = {
+                    k: v / ow_total for k, v in race_overrides.items()
+                }
+            else:
+                scoring_weights = self.weights
+
             score = sum(
-                self.weights.get(fname, 0) * fval
+                scoring_weights.get(fname, 0) * fval
                 for fname, fval in features.items()
             )
 
