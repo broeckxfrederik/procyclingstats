@@ -13,6 +13,7 @@ import pytest
 from procyclingstats.classics_predictor import (
     CLASSICS_METADATA,
     DEFAULT_WEIGHTS,
+    TEAM_TIERS,
     ClassicType,
     ClassicsPredictor,
     TerrainType,
@@ -636,7 +637,8 @@ class TestPredictionPipeline:
         expected_features = {
             "recent_form", "classic_pedigree", "specialty_score",
             "age_distance_fit", "previous_year", "preparation",
-            "injury_penalty",
+            "injury_penalty", "terrain_match", "sprint_capability",
+            "momentum", "team_strength",
         }
         assert set(p["features"].keys()) == expected_features
 
@@ -741,6 +743,10 @@ class TestExplain:
                 "previous_year": 0.60,
                 "preparation": 0.95,
                 "injury_penalty": 1.0,
+                "terrain_match": 0.75,
+                "sprint_capability": 0.60,
+                "momentum": 0.70,
+                "team_strength": 0.80,
             },
         }
         explanation = predictor.explain(prediction)
@@ -748,6 +754,182 @@ class TestExplain:
         assert "78.5" in explanation
         assert "Recent form" in explanation
         assert "Age-distance" in explanation
+        assert "Terrain-rider match" in explanation
+        assert "Team strength" in explanation
+
+
+class TestTerrainMatchScore:
+    """Test terrain-rider specialty matching."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+
+    def test_climber_scores_high_for_hilly_race(self):
+        """A strong climber should score well for LBL (climbing_difficulty=0.85)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 2000, "climber": 3000,
+                "gc": 2000, "time_trial": 500, "sprint": 100,
+            }
+        }
+        meta = CLASSICS_METADATA["race/liege-bastogne-liege"]
+        score = self.predictor._score_terrain_match(
+            profile, TerrainType.HILLY, meta
+        )
+        assert score > 0.7
+
+    def test_sprinter_scores_low_for_hilly_race(self):
+        """A pure sprinter should score lower than a climber for a hilly race."""
+        sprinter_profile = {
+            "points_per_speciality": {
+                "one_day_races": 500, "climber": 50,
+                "gc": 50, "time_trial": 100, "sprint": 3000,
+            }
+        }
+        climber_profile = {
+            "points_per_speciality": {
+                "one_day_races": 2000, "climber": 3000,
+                "gc": 2000, "time_trial": 500, "sprint": 100,
+            }
+        }
+        meta = CLASSICS_METADATA["race/liege-bastogne-liege"]
+        sprinter_score = self.predictor._score_terrain_match(
+            sprinter_profile, TerrainType.HILLY, meta
+        )
+        climber_score = self.predictor._score_terrain_match(
+            climber_profile, TerrainType.HILLY, meta
+        )
+        assert sprinter_score < climber_score
+
+    def test_tt_specialist_scores_high_for_cobbles(self):
+        """A TT/power rider should score well for Roubaix (cobbles)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 1500, "climber": 50,
+                "gc": 100, "time_trial": 3000, "sprint": 200,
+            }
+        }
+        meta = CLASSICS_METADATA["race/paris-roubaix"]
+        score = self.predictor._score_terrain_match(
+            profile, TerrainType.COBBLES, meta
+        )
+        assert score > 0.7
+
+    def test_empty_profile_returns_zero(self):
+        score = self.predictor._score_terrain_match({}, TerrainType.HILLY, {})
+        assert score == 0.0
+
+
+class TestSprintCapabilityScore:
+    """Test sprint capability scoring."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+
+    def test_sprinter_high_in_sprint_race(self):
+        """A sprinter should score high in Gent-Wevelgem (sprint_finish_prob=0.6)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 1000, "sprint": 3000,
+            }
+        }
+        meta = CLASSICS_METADATA["race/gent-wevelgem"]
+        score = self.predictor._score_sprint_capability(profile, meta)
+        assert score > 0.7
+
+    def test_sprinter_lower_in_fleche(self):
+        """A sprinter should score lower in Flèche Wallonne (sprint_finish_prob=0.0)."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 500, "sprint": 3000,
+            }
+        }
+        meta_gw = CLASSICS_METADATA["race/gent-wevelgem"]
+        meta_fl = CLASSICS_METADATA["race/la-fleche-wallone"]
+        score_gw = self.predictor._score_sprint_capability(profile, meta_gw)
+        score_fl = self.predictor._score_sprint_capability(profile, meta_fl)
+        assert score_gw > score_fl
+
+    def test_puncheur_scores_everywhere(self):
+        """A puncheur with high one_day pts should score decently even in non-sprint races."""
+        profile = {
+            "points_per_speciality": {
+                "one_day_races": 4000, "sprint": 200,
+            }
+        }
+        meta = CLASSICS_METADATA["race/la-fleche-wallone"]
+        score = self.predictor._score_sprint_capability(profile, meta)
+        assert score > 0.9  # Basically all punch, sprint_prob=0
+
+
+class TestMomentumScore:
+    """Test form momentum scoring."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+        self.race_date = date(2024, 4, 7)
+
+    def test_no_recent_results_low(self):
+        score = self.predictor._score_momentum([], self.race_date)
+        assert score == 0.3
+
+    def test_improving_form_beats_declining(self):
+        """A rider improving should outscore a declining rider."""
+        improving = _make_results([
+            ("2024-3-30", 2, "race/a/2024", "1.UWT"),
+            ("2024-3-20", 5, "race/b/2024", "1.UWT"),
+            ("2024-3-10", 10, "race/c/2024", "1.UWT"),  # recent = better
+            ("2024-2-20", 20, "race/d/2024", "1.UWT"),  # earlier = worse
+            ("2024-2-10", 18, "race/e/2024", "1.UWT"),
+        ])
+        declining = _make_results([
+            ("2024-3-30", 15, "race/a/2024", "1.UWT"),
+            ("2024-3-20", 18, "race/b/2024", "1.UWT"),
+            ("2024-3-10", 20, "race/c/2024", "1.UWT"),  # recent = worse
+            ("2024-2-20", 2, "race/d/2024", "1.UWT"),  # earlier = better
+            ("2024-2-10", 3, "race/e/2024", "1.UWT"),
+        ])
+        score_up = self.predictor._score_momentum(improving, self.race_date)
+        score_down = self.predictor._score_momentum(declining, self.race_date)
+        assert score_up > score_down
+
+    def test_recent_wins_boost(self):
+        """Recent wins should give a momentum boost."""
+        wins = _make_results([
+            ("2024-3-30", 1, "race/a/2024", "1.UWT"),
+            ("2024-3-25", 1, "race/b/2024", "1.UWT"),
+        ])
+        score = self.predictor._score_momentum(wins, self.race_date)
+        assert score > 0.7
+
+
+class TestTeamStrengthScore:
+    """Test team strength scoring."""
+
+    def setup_method(self):
+        self.predictor = ClassicsPredictor()
+
+    def test_tier1_team_scores_highest(self):
+        score = self.predictor._score_team_strength(
+            {"team": "uae-team-emirates"}
+        )
+        assert score == 1.0
+
+    def test_tier2_team_scores_medium(self):
+        score = self.predictor._score_team_strength(
+            {"team": "ineos-grenadiers"}
+        )
+        assert score == 0.7
+
+    def test_unknown_team_scores_low(self):
+        score = self.predictor._score_team_strength(
+            {"team": "some-small-team"}
+        )
+        assert score == 0.4
+
+    def test_no_team_neutral(self):
+        score = self.predictor._score_team_strength({})
+        assert score == 0.5
 
 
 class TestClassicsMetadata:
@@ -773,4 +955,16 @@ class TestClassicsMetadata:
         for url, meta in CLASSICS_METADATA.items():
             assert 1 <= meta["month"] <= 12, (
                 f"{url} has invalid month {meta['month']}"
+            )
+
+    def test_sprint_finish_prob_valid(self):
+        for url, meta in CLASSICS_METADATA.items():
+            assert 0.0 <= meta.get("sprint_finish_prob", 0.2) <= 1.0, (
+                f"{url} has invalid sprint_finish_prob"
+            )
+
+    def test_climbing_difficulty_valid(self):
+        for url, meta in CLASSICS_METADATA.items():
+            assert 0.0 <= meta.get("climbing_difficulty", 0.4) <= 1.0, (
+                f"{url} has invalid climbing_difficulty"
             )

@@ -61,12 +61,16 @@ class TerrainType(Enum):
 # Weights sum to 1.0. Adjust to shift emphasis.
 DEFAULT_WEIGHTS = {
     "classic_pedigree": 0.35,
-    "previous_year": 0.16,
-    "specialty_score": 0.15,
-    "preparation": 0.14,
-    "injury_penalty": 0.10,
-    "recent_form": 0.05,
-    "age_distance_fit": 0.05,
+    "terrain_match": 0.15,
+    "previous_year": 0.15,
+    "sprint_capability": 0.08,
+    "specialty_score": 0.05,
+    "preparation": 0.05,
+    "injury_penalty": 0.042,
+    "team_strength": 0.042,
+    "momentum": 0.034,
+    "recent_form": 0.025,
+    "age_distance_fit": 0.025,
 }
 
 # Known classics with metadata for the prediction model.
@@ -78,6 +82,8 @@ CLASSICS_METADATA = {
         "typical_distance": 300,
         "month": 3,
         "name": "Milano-Sanremo",
+        "sprint_finish_prob": 0.65,
+        "climbing_difficulty": 0.2,
     },
     "race/ronde-van-vlaanderen": {
         "type": ClassicType.MONUMENT,
@@ -85,6 +91,8 @@ CLASSICS_METADATA = {
         "typical_distance": 260,
         "month": 4,
         "name": "Ronde van Vlaanderen",
+        "sprint_finish_prob": 0.1,
+        "climbing_difficulty": 0.5,
     },
     "race/paris-roubaix": {
         "type": ClassicType.MONUMENT,
@@ -92,6 +100,8 @@ CLASSICS_METADATA = {
         "typical_distance": 260,
         "month": 4,
         "name": "Paris-Roubaix",
+        "sprint_finish_prob": 0.15,
+        "climbing_difficulty": 0.05,
     },
     "race/liege-bastogne-liege": {
         "type": ClassicType.MONUMENT,
@@ -99,6 +109,8 @@ CLASSICS_METADATA = {
         "typical_distance": 260,
         "month": 4,
         "name": "Liège-Bastogne-Liège",
+        "sprint_finish_prob": 0.05,
+        "climbing_difficulty": 0.85,
     },
     "race/il-lombardia": {
         "type": ClassicType.MONUMENT,
@@ -106,6 +118,8 @@ CLASSICS_METADATA = {
         "typical_distance": 240,
         "month": 10,
         "name": "Il Lombardia",
+        "sprint_finish_prob": 0.05,
+        "climbing_difficulty": 0.8,
     },
     "race/strade-bianche": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -113,6 +127,8 @@ CLASSICS_METADATA = {
         "typical_distance": 185,
         "month": 3,
         "name": "Strade Bianche",
+        "sprint_finish_prob": 0.1,
+        "climbing_difficulty": 0.6,
     },
     "race/e3-harelbeke": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -120,6 +136,8 @@ CLASSICS_METADATA = {
         "typical_distance": 205,
         "month": 3,
         "name": "E3 Saxo Classic",
+        "sprint_finish_prob": 0.15,
+        "climbing_difficulty": 0.35,
     },
     "race/gent-wevelgem": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -127,6 +145,8 @@ CLASSICS_METADATA = {
         "typical_distance": 250,
         "month": 3,
         "name": "Gent-Wevelgem",
+        "sprint_finish_prob": 0.6,
+        "climbing_difficulty": 0.2,
     },
     "race/amstel-gold-race": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -134,6 +154,8 @@ CLASSICS_METADATA = {
         "typical_distance": 260,
         "month": 4,
         "name": "Amstel Gold Race",
+        "sprint_finish_prob": 0.2,
+        "climbing_difficulty": 0.55,
     },
     "race/la-fleche-wallone": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -141,6 +163,8 @@ CLASSICS_METADATA = {
         "typical_distance": 195,
         "month": 4,
         "name": "La Flèche Wallonne",
+        "sprint_finish_prob": 0.0,
+        "climbing_difficulty": 0.75,
     },
     "race/san-sebastian": {
         "type": ClassicType.MAJOR_CLASSIC,
@@ -148,6 +172,8 @@ CLASSICS_METADATA = {
         "typical_distance": 225,
         "month": 7,
         "name": "Clásica San Sebastián",
+        "sprint_finish_prob": 0.1,
+        "climbing_difficulty": 0.7,
     },
     "race/dwars-door-vlaanderen": {
         "type": ClassicType.SEMI_CLASSIC,
@@ -155,6 +181,8 @@ CLASSICS_METADATA = {
         "typical_distance": 185,
         "month": 3,
         "name": "Dwars door Vlaanderen",
+        "sprint_finish_prob": 0.2,
+        "climbing_difficulty": 0.3,
     },
     "race/brabantse-pijl": {
         "type": ClassicType.SEMI_CLASSIC,
@@ -162,7 +190,42 @@ CLASSICS_METADATA = {
         "typical_distance": 200,
         "month": 4,
         "name": "Brabantse Pijl",
+        "sprint_finish_prob": 0.15,
+        "climbing_difficulty": 0.5,
     },
+    "race/kuurne-brussel-kuurne": {
+        "type": ClassicType.SEMI_CLASSIC,
+        "terrain": TerrainType.FLAT_PUNCH,
+        "typical_distance": 197,
+        "month": 3,
+        "name": "Kuurne-Brussel-Kuurne",
+        "sprint_finish_prob": 0.8,
+        "climbing_difficulty": 0.1,
+    },
+}
+
+# Known team tiers for team strength scoring.
+# Tier 1 = top classics teams, tier 2 = strong teams, tier 3 = others.
+TEAM_TIERS = {
+    # Tier 1 — dominant classics squads
+    "uae-team-emirates": 1,
+    "team-visma-lease-a-bike": 1,
+    "alpecin-deceuninck": 1,
+    "lidl-trek": 1,
+    "soudal-quick-step": 1,
+    # Tier 2 — strong contenders
+    "ineos-grenadiers": 2,
+    "groupama-fdj": 2,
+    "bahrain-victorious": 2,
+    "team-jayco-alula": 2,
+    "ef-education-easypost": 2,
+    "intermarche-wanty": 2,
+    "lotto-dstny": 2,
+    "movistar-team": 2,
+    "decathlon-ag2r-la-mondiale-team": 2,
+    "cofidis": 2,
+    "team-dsm-firmenich-postnl": 2,
+    "uno-x-mobility": 2,
 }
 
 
@@ -371,6 +434,8 @@ class ClassicsPredictor:
             except (ValueError, IndexError):
                 age = None
 
+        race_meta = CLASSICS_METADATA.get(race_base_url, {})
+
         features = {}
 
         features["age_distance_fit"] = self._score_age_distance(age, distance)
@@ -384,6 +449,14 @@ class ClassicsPredictor:
         )
         features["preparation"] = self._score_preparation(results, race_date)
         features["injury_penalty"] = self._score_injury(results, race_date)
+        features["terrain_match"] = self._score_terrain_match(
+            profile, terrain, race_meta
+        )
+        features["sprint_capability"] = self._score_sprint_capability(
+            profile, race_meta
+        )
+        features["momentum"] = self._score_momentum(results, race_date)
+        features["team_strength"] = self._score_team_strength(rider_data)
 
         return features
 
@@ -707,6 +780,185 @@ class ClassicsPredictor:
 
         return max(0.3, penalty)
 
+    @staticmethod
+    def _score_terrain_match(
+        profile: Dict[str, Any],
+        terrain: TerrainType,
+        race_meta: Dict[str, Any],
+    ) -> float:
+        """
+        Score how well a rider's specialty profile matches the race terrain.
+
+        Different terrains reward different specialty combinations:
+        - COBBLES: power-based (one_day + time_trial)
+        - HILLY / MOUNTAINOUS: climbing ability (one_day + climber)
+        - FLAT_PUNCH: sprint + one_day
+        - COBBLES_HILLS: all-round (one_day + time_trial + climber)
+
+        Uses the climbing_difficulty from race metadata to blend between
+        climber-friendly and power-friendly scoring.
+        """
+        specialties = profile.get("points_per_speciality", {})
+        one_day = specialties.get("one_day_races", 0)
+        sprint = specialties.get("sprint", 0)
+        climber = specialties.get("climber", 0)
+        tt = specialties.get("time_trial", 0)
+        gc = specialties.get("gc", 0)
+
+        climbing_diff = race_meta.get("climbing_difficulty", 0.4)
+
+        # Terrain-specific scoring
+        if terrain == TerrainType.COBBLES:
+            # Power + endurance: TT (raw power) + one_day
+            raw = one_day * 0.5 + tt * 0.35 + gc * 0.15
+            ref = 4000.0
+        elif terrain == TerrainType.HILLY or terrain == TerrainType.MOUNTAINOUS:
+            # Climbing ability scales with difficulty
+            raw = (
+                one_day * (0.4 - climbing_diff * 0.15)
+                + climber * climbing_diff * 0.5
+                + gc * climbing_diff * 0.3
+                + tt * (1 - climbing_diff) * 0.1
+            )
+            ref = 3500.0
+        elif terrain == TerrainType.FLAT_PUNCH:
+            # Sprint + endurance
+            raw = one_day * 0.35 + sprint * 0.4 + tt * 0.15 + gc * 0.1
+            ref = 3500.0
+        elif terrain == TerrainType.COBBLES_HILLS:
+            # All-round: cobbles power + hills
+            raw = one_day * 0.4 + tt * 0.2 + climber * 0.2 + gc * 0.1 + sprint * 0.1
+            ref = 3500.0
+        else:
+            raw = one_day
+            ref = 4000.0
+
+        if raw <= 0:
+            return 0.0
+
+        score = math.log1p(raw) / math.log1p(ref)
+        return min(1.0, score)
+
+    @staticmethod
+    def _score_sprint_capability(
+        profile: Dict[str, Any],
+        race_meta: Dict[str, Any],
+    ) -> float:
+        """
+        Score sprint capability relative to race sprint finish probability.
+
+        Races like Gent-Wevelgem and Milano-Sanremo often end in sprints,
+        so sprint specialists get a boost. For races that rarely end in
+        sprints (Flèche Wallonne, LBL), this feature contributes little.
+        """
+        sprint_prob = race_meta.get("sprint_finish_prob", 0.2)
+        specialties = profile.get("points_per_speciality", {})
+        sprint_pts = specialties.get("sprint", 0)
+        one_day_pts = specialties.get("one_day_races", 0)
+
+        # Sprint ability (log-normalized)
+        ref_sprint = 2000.0
+        if sprint_pts > 0:
+            sprint_score = math.log1p(sprint_pts) / math.log1p(ref_sprint)
+            sprint_score = min(1.0, sprint_score)
+        else:
+            sprint_score = 0.0
+
+        # Non-sprint ability (punching power / solo ability)
+        ref_one_day = 4000.0
+        if one_day_pts > 0:
+            punch_score = math.log1p(one_day_pts) / math.log1p(ref_one_day)
+            punch_score = min(1.0, punch_score)
+        else:
+            punch_score = 0.0
+
+        # Blend based on sprint finish probability
+        return sprint_score * sprint_prob + punch_score * (1.0 - sprint_prob)
+
+    @staticmethod
+    def _score_momentum(
+        results: List[Dict[str, Any]],
+        race_date: date,
+    ) -> float:
+        """
+        Score recent form trajectory (improving vs declining).
+
+        Compares form in the last 30 days vs 30-60 days before the race.
+        An upward trajectory (recent results better than older ones) scores
+        higher. Also rewards recent podiums and wins as confidence boosters.
+        """
+        recent = []  # last 30 days
+        earlier = []  # 30-60 days ago
+
+        for r in results:
+            try:
+                rdate = _parse_date(r["date"])
+            except (KeyError, ValueError, IndexError):
+                continue
+            days_ago = (race_date - rdate).days
+            if days_ago <= 0:
+                continue
+
+            rank = r.get("rank")
+            if isinstance(rank, str) and rank.isdigit():
+                rank = int(rank)
+            if not isinstance(rank, int) or rank <= 0:
+                continue
+
+            result_score = max(0.0, 1.0 - (rank - 1) * 0.05)
+
+            if days_ago <= 30:
+                recent.append(result_score)
+            elif days_ago <= 60:
+                earlier.append(result_score)
+
+        if not recent:
+            return 0.3  # No recent activity = low momentum
+
+        recent_avg = sum(recent) / len(recent)
+
+        # Trajectory bonus: compare recent vs earlier
+        if earlier:
+            earlier_avg = sum(earlier) / len(earlier)
+            trajectory = recent_avg - earlier_avg
+            # Trajectory from -1 to +1, map to 0.3 - 0.7 contribution
+            trajectory_score = 0.5 + trajectory * 0.5
+            trajectory_score = max(0.0, min(1.0, trajectory_score))
+        else:
+            trajectory_score = 0.5  # No comparison data
+
+        # Recent podium/win bonus
+        podium_count = sum(1 for s in recent if s >= 0.85)  # top-3
+        podium_bonus = min(0.3, podium_count * 0.1)
+
+        # Combine: base form (50%) + trajectory (30%) + podium bonus (20%)
+        score = recent_avg * 0.5 + trajectory_score * 0.3 + podium_bonus / 0.3 * 0.2
+        return max(0.0, min(1.0, score))
+
+    @staticmethod
+    def _score_team_strength(rider_data: Dict[str, Any]) -> float:
+        """
+        Score the strength of a rider's team.
+
+        Top classics teams (UAE, Visma, Alpecin, Lidl-Trek, Soudal-QS)
+        provide tactical advantages: positioning, leadout trains, team
+        support in crosswinds and on cobbles.
+
+        Team info is read from ``rider_data["team"]`` (a team slug).
+        Falls back to 0.5 if unknown.
+        """
+        team = rider_data.get("team", "")
+        if not team:
+            return 0.5  # Unknown team = neutral
+
+        tier = TEAM_TIERS.get(team, 3)
+        if tier == 1:
+            return 1.0
+        elif tier == 2:
+            return 0.7
+        else:
+            return 0.4
+
     # ------------------------------------------------------------------
     # Data fetching (live scraping, used when rider_data is not provided)
     # ------------------------------------------------------------------
@@ -837,6 +1089,10 @@ class ClassicsPredictor:
             "previous_year": "Previous year results",
             "preparation": "Season preparation",
             "injury_penalty": "Injury/fitness indicator",
+            "terrain_match": "Terrain-rider match",
+            "sprint_capability": "Sprint capability",
+            "momentum": "Form momentum",
+            "team_strength": "Team strength",
         }
 
         for feat_name, label in labels.items():

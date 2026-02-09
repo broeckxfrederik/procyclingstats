@@ -74,53 +74,103 @@ BIRTHDATES = {
     "rider/andrea-bagioli": "1999-3-23",
 }
 
-# Estimated PCS one-day-race specialty points (pre-2025 career level)
-ONE_DAY_PTS = {
-    "rider/tadej-pogacar": 4500,
-    "rider/mathieu-van-der-poel": 5000,
-    "rider/mads-pedersen": 3200,
-    "rider/wout-van-aert": 3800,
-    "rider/tom-pidcock": 2200,
-    "rider/ben-healy": 1200,
-    "rider/filippo-ganna": 1500,
-    "rider/tim-wellens": 2000,
-    "rider/jasper-stuyven": 2100,
-    "rider/stefan-kueng": 1400,
-    "rider/tiesj-benoot": 2000,
-    "rider/matteo-jorgenson": 1300,
-    "rider/remco-evenepoel": 2800,
-    "rider/mattias-skjelmose": 1200,
-    "rider/magnus-cort": 1600,
-    "rider/michael-matthews": 2400,
-    "rider/neilson-powless": 1100,
-    "rider/kaden-groves": 800,
-    "rider/jasper-philipsen": 1800,
-    "rider/giulio-ciccone": 1000,
-    "rider/thibau-nys": 400,
-    "rider/romain-gregoire": 500,
-    "rider/michael-valgren": 1700,
-    "rider/davide-ballerini": 1200,
-    "rider/fred-wright": 900,
-    "rider/florian-vermeersch": 900,
-    "rider/alexander-kristoff": 2600,
-    "rider/jonathan-milan": 700,
-    "rider/olav-kooij": 600,
-    "rider/hugo-hofstetter": 1000,
-    "rider/tim-merlier": 1300,
-    "rider/biniam-girmay": 1400,
-    "rider/lenny-martinez": 300,
-    "rider/kevin-vauquelin": 600,
-    "rider/pello-bilbao": 1000,
-    "rider/gianni-vermeersch": 800,
-    "rider/daniel-martinez": 1200,
-    "rider/santiago-buitrago": 600,
-    "rider/mauro-schmid": 700,
-    "rider/matteo-trentin": 2200,
-    "rider/ivan-garcia-cortina": 900,
-    "rider/laurenz-rex": 400,
-    "rider/axel-laurance": 300,
-    "rider/simone-velasco": 600,
-    "rider/andrea-bagioli": 800,
+# Estimated PCS specialty points (pre-2025 career level)
+# Keys: one_day, sprint, climber, tt, gc
+SPECIALTY_PTS = {
+    "rider/tadej-pogacar":         {"one_day": 4500, "sprint": 400, "climber": 4800, "tt": 2000, "gc": 5000},
+    "rider/mathieu-van-der-poel":  {"one_day": 5000, "sprint": 1200, "climber": 800, "tt": 1500, "gc": 400},
+    "rider/mads-pedersen":         {"one_day": 3200, "sprint": 2200, "climber": 200, "tt": 1800, "gc": 200},
+    "rider/wout-van-aert":         {"one_day": 3800, "sprint": 1800, "climber": 1000, "tt": 2500, "gc": 600},
+    "rider/tom-pidcock":           {"one_day": 2200, "sprint": 300, "climber": 1800, "tt": 800, "gc": 1200},
+    "rider/ben-healy":             {"one_day": 1200, "sprint": 100, "climber": 1500, "tt": 400, "gc": 800},
+    "rider/filippo-ganna":         {"one_day": 1500, "sprint": 600, "climber": 50, "tt": 3500, "gc": 100},
+    "rider/tim-wellens":           {"one_day": 2000, "sprint": 300, "climber": 800, "tt": 500, "gc": 400},
+    "rider/jasper-stuyven":        {"one_day": 2100, "sprint": 900, "climber": 100, "tt": 600, "gc": 100},
+    "rider/stefan-kueng":          {"one_day": 1400, "sprint": 200, "climber": 50, "tt": 2800, "gc": 100},
+    "rider/tiesj-benoot":          {"one_day": 2000, "sprint": 200, "climber": 500, "tt": 600, "gc": 300},
+    "rider/matteo-jorgenson":      {"one_day": 1300, "sprint": 200, "climber": 400, "tt": 800, "gc": 600},
+    "rider/remco-evenepoel":       {"one_day": 2800, "sprint": 300, "climber": 2200, "tt": 3500, "gc": 3800},
+    "rider/mattias-skjelmose":     {"one_day": 1200, "sprint": 200, "climber": 800, "tt": 1200, "gc": 600},
+    "rider/magnus-cort":           {"one_day": 1600, "sprint": 800, "climber": 600, "tt": 300, "gc": 200},
+    "rider/michael-matthews":      {"one_day": 2400, "sprint": 1800, "climber": 300, "tt": 500, "gc": 200},
+    "rider/neilson-powless":       {"one_day": 1100, "sprint": 200, "climber": 600, "tt": 400, "gc": 400},
+    "rider/kaden-groves":          {"one_day": 800, "sprint": 2000, "climber": 50, "tt": 100, "gc": 50},
+    "rider/jasper-philipsen":      {"one_day": 1800, "sprint": 3500, "climber": 50, "tt": 200, "gc": 50},
+    "rider/giulio-ciccone":        {"one_day": 1000, "sprint": 100, "climber": 2000, "tt": 300, "gc": 1200},
+    "rider/thibau-nys":            {"one_day": 400, "sprint": 300, "climber": 500, "tt": 200, "gc": 200},
+    "rider/romain-gregoire":       {"one_day": 500, "sprint": 200, "climber": 600, "tt": 300, "gc": 300},
+    "rider/michael-valgren":       {"one_day": 1700, "sprint": 400, "climber": 300, "tt": 400, "gc": 200},
+    "rider/davide-ballerini":      {"one_day": 1200, "sprint": 800, "climber": 50, "tt": 200, "gc": 50},
+    "rider/fred-wright":           {"one_day": 900, "sprint": 400, "climber": 200, "tt": 500, "gc": 200},
+    "rider/florian-vermeersch":    {"one_day": 900, "sprint": 200, "climber": 100, "tt": 800, "gc": 200},
+    "rider/alexander-kristoff":    {"one_day": 2600, "sprint": 2500, "climber": 50, "tt": 400, "gc": 50},
+    "rider/jonathan-milan":        {"one_day": 700, "sprint": 2800, "climber": 50, "tt": 600, "gc": 50},
+    "rider/olav-kooij":            {"one_day": 600, "sprint": 2600, "climber": 50, "tt": 200, "gc": 50},
+    "rider/hugo-hofstetter":       {"one_day": 1000, "sprint": 1200, "climber": 100, "tt": 200, "gc": 50},
+    "rider/tim-merlier":           {"one_day": 1300, "sprint": 2800, "climber": 50, "tt": 300, "gc": 50},
+    "rider/biniam-girmay":         {"one_day": 1400, "sprint": 2200, "climber": 100, "tt": 200, "gc": 100},
+    "rider/lenny-martinez":        {"one_day": 300, "sprint": 100, "climber": 800, "tt": 200, "gc": 500},
+    "rider/kevin-vauquelin":       {"one_day": 600, "sprint": 100, "climber": 800, "tt": 500, "gc": 400},
+    "rider/pello-bilbao":          {"one_day": 1000, "sprint": 100, "climber": 1500, "tt": 400, "gc": 1000},
+    "rider/gianni-vermeersch":     {"one_day": 800, "sprint": 200, "climber": 200, "tt": 300, "gc": 100},
+    "rider/daniel-martinez":       {"one_day": 1200, "sprint": 100, "climber": 1800, "tt": 800, "gc": 1800},
+    "rider/santiago-buitrago":     {"one_day": 600, "sprint": 100, "climber": 1500, "tt": 400, "gc": 800},
+    "rider/mauro-schmid":          {"one_day": 700, "sprint": 200, "climber": 500, "tt": 600, "gc": 300},
+    "rider/matteo-trentin":        {"one_day": 2200, "sprint": 1500, "climber": 100, "tt": 600, "gc": 100},
+    "rider/ivan-garcia-cortina":   {"one_day": 900, "sprint": 500, "climber": 100, "tt": 400, "gc": 100},
+    "rider/laurenz-rex":           {"one_day": 400, "sprint": 300, "climber": 50, "tt": 200, "gc": 50},
+    "rider/axel-laurance":         {"one_day": 300, "sprint": 100, "climber": 400, "tt": 200, "gc": 200},
+    "rider/simone-velasco":        {"one_day": 600, "sprint": 200, "climber": 400, "tt": 200, "gc": 200},
+    "rider/andrea-bagioli":        {"one_day": 800, "sprint": 300, "climber": 500, "tt": 300, "gc": 300},
+}
+
+# Team assignments (2025 team slugs)
+RIDER_TEAMS = {
+    "rider/tadej-pogacar": "uae-team-emirates",
+    "rider/mathieu-van-der-poel": "alpecin-deceuninck",
+    "rider/mads-pedersen": "lidl-trek",
+    "rider/wout-van-aert": "team-visma-lease-a-bike",
+    "rider/tom-pidcock": "ineos-grenadiers",
+    "rider/ben-healy": "ef-education-easypost",
+    "rider/filippo-ganna": "ineos-grenadiers",
+    "rider/tim-wellens": "uae-team-emirates",
+    "rider/jasper-stuyven": "lidl-trek",
+    "rider/stefan-kueng": "groupama-fdj",
+    "rider/tiesj-benoot": "team-visma-lease-a-bike",
+    "rider/matteo-jorgenson": "team-visma-lease-a-bike",
+    "rider/remco-evenepoel": "soudal-quick-step",
+    "rider/mattias-skjelmose": "lidl-trek",
+    "rider/magnus-cort": "uno-x-mobility",
+    "rider/michael-matthews": "team-jayco-alula",
+    "rider/neilson-powless": "ef-education-easypost",
+    "rider/kaden-groves": "alpecin-deceuninck",
+    "rider/jasper-philipsen": "alpecin-deceuninck",
+    "rider/giulio-ciccone": "lidl-trek",
+    "rider/thibau-nys": "lidl-trek",
+    "rider/romain-gregoire": "groupama-fdj",
+    "rider/michael-valgren": "ef-education-easypost",
+    "rider/davide-ballerini": "movistar-team",
+    "rider/fred-wright": "bahrain-victorious",
+    "rider/florian-vermeersch": "alpecin-deceuninck",
+    "rider/alexander-kristoff": "uno-x-mobility",
+    "rider/jonathan-milan": "lidl-trek",
+    "rider/olav-kooij": "team-visma-lease-a-bike",
+    "rider/hugo-hofstetter": "cofidis",
+    "rider/tim-merlier": "soudal-quick-step",
+    "rider/biniam-girmay": "intermarche-wanty",
+    "rider/lenny-martinez": "groupama-fdj",
+    "rider/kevin-vauquelin": "decathlon-ag2r-la-mondiale-team",
+    "rider/pello-bilbao": "bahrain-victorious",
+    "rider/gianni-vermeersch": "alpecin-deceuninck",
+    "rider/daniel-martinez": "decathlon-ag2r-la-mondiale-team",
+    "rider/santiago-buitrago": "bahrain-victorious",
+    "rider/mauro-schmid": "team-jayco-alula",
+    "rider/matteo-trentin": "team-visma-lease-a-bike",
+    "rider/ivan-garcia-cortina": "movistar-team",
+    "rider/laurenz-rex": "intermarche-wanty",
+    "rider/axel-laurance": "decathlon-ag2r-la-mondiale-team",
+    "rider/simone-velasco": "movistar-team",
+    "rider/andrea-bagioli": "decathlon-ag2r-la-mondiale-team",
 }
 
 
@@ -713,15 +763,20 @@ def build_rider_data(race_date: date) -> Dict[str, Dict]:
                 results.append(_r("2025-2-10", 8, "race/prep/2025", "1.Pro"))
                 results.append(_r("2025-2-20", 12, "race/prep/2025", "1.Pro"))
 
+        pts = SPECIALTY_PTS.get(rider_url, {})
         rider_data[rider_url] = {
             "profile": {
                 "birthdate": BIRTHDATES[rider_url],
                 "points_per_speciality": {
-                    "one_day_races": ONE_DAY_PTS.get(rider_url, 500),
-                    "gc": 0, "time_trial": 0, "sprint": 0, "climber": 0,
+                    "one_day_races": pts.get("one_day", 500),
+                    "gc": pts.get("gc", 0),
+                    "time_trial": pts.get("tt", 0),
+                    "sprint": pts.get("sprint", 0),
+                    "climber": pts.get("climber", 0),
                 },
             },
             "results": results,
+            "team": RIDER_TEAMS.get(rider_url, ""),
         }
     return rider_data
 
@@ -886,65 +941,73 @@ def optimize_weights(verbose: bool = False) -> Tuple[Dict[str, float], Dict[str,
     Grid search over weight combinations to find the best fit
     for the 2025 classics results.
 
-    Optimizes for a composite score:
-      0.4 * top10_hit + 0.3 * winner_top5 + 0.3 * (1 - rank_err/20)
+    Optimizes for a composite score emphasizing top-10 and top-5 hit rates.
     """
-    # Sample weight values (step of 0.05)
-    steps = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
-
-    feature_names = [
-        "recent_form", "classic_pedigree", "specialty_score",
-        "age_distance_fit", "previous_year", "preparation", "injury_penalty"
-    ]
-
     best_score = -1
     best_weights = None
     best_metrics = None
     tested = 0
 
-    # Smart search: vary the 3 most impactful features, fix others
-    major = ["recent_form", "classic_pedigree", "specialty_score", "age_distance_fit"]
-    minor = ["previous_year", "preparation", "injury_penalty"]
+    # Major features to vary (most impactful)
+    cp_steps = [0.15, 0.20, 0.25, 0.30, 0.35]
+    tm_steps = [0.05, 0.10, 0.15, 0.20]
+    ss_steps = [0.05, 0.10, 0.15]
+    py_steps = [0.05, 0.10, 0.15]
 
-    for rf in steps:
-        for cp in steps:
-            for ss in [0.05, 0.10, 0.15, 0.20]:
-                for ad in [0.05, 0.10, 0.15, 0.20]:
-                    remaining = 1.0 - rf - cp - ss - ad
-                    if remaining < 0.10 or remaining > 0.50:
+    for cp in cp_steps:
+        for tm in tm_steps:
+            for ss in ss_steps:
+                for py in py_steps:
+                    major_sum = cp + tm + ss + py
+                    remaining = 1.0 - major_sum
+                    if remaining < 0.20 or remaining > 0.60:
                         continue
-                    # Split remaining among minor features
-                    py = remaining * 0.40
-                    pr = remaining * 0.35
-                    ip = remaining * 0.25
+                    # Distribute remaining among minor features
+                    # (preparation, injury, recent_form, age, sprint, momentum, team)
+                    for prep in [0.05, 0.10, 0.15]:
+                        for sp in [0.03, 0.05, 0.08]:
+                            rest = remaining - prep - sp
+                            if rest < 0.10 or rest > 0.45:
+                                continue
+                            # Split rest among: injury, recent_form, age_dist, momentum, team
+                            ip = rest * 0.25
+                            rf = rest * 0.15
+                            ad = rest * 0.15
+                            mom = rest * 0.20
+                            ts = rest * 0.25
 
-                    weights = {
-                        "recent_form": rf,
-                        "classic_pedigree": cp,
-                        "specialty_score": ss,
-                        "age_distance_fit": ad,
-                        "previous_year": py,
-                        "preparation": pr,
-                        "injury_penalty": ip,
-                    }
+                            weights = {
+                                "classic_pedigree": cp,
+                                "terrain_match": tm,
+                                "specialty_score": ss,
+                                "previous_year": py,
+                                "preparation": prep,
+                                "sprint_capability": sp,
+                                "injury_penalty": ip,
+                                "recent_form": rf,
+                                "age_distance_fit": ad,
+                                "momentum": mom,
+                                "team_strength": ts,
+                            }
 
-                    metrics = run_backtest(weights)
-                    if not metrics:
-                        continue
+                            metrics = run_backtest(weights)
+                            if not metrics:
+                                continue
 
-                    # Composite score
-                    score = (
-                        0.35 * metrics["avg_top10_hit"]
-                        + 0.25 * metrics["winner_top5_pct"]
-                        + 0.25 * metrics["avg_top5_hit"]
-                        + 0.15 * max(0, 1.0 - metrics["avg_rank_error"] / 20)
-                    )
+                            # Composite score — emphasize top-10 and top-5 hit rates
+                            score = (
+                                0.30 * metrics["avg_top10_hit"]
+                                + 0.30 * metrics["avg_top5_hit"]
+                                + 0.20 * metrics["winner_top5_pct"]
+                                + 0.10 * metrics["winner_top3_pct"]
+                                + 0.10 * max(0, 1.0 - metrics["avg_rank_error"] / 20)
+                            )
 
-                    tested += 1
-                    if score > best_score:
-                        best_score = score
-                        best_weights = weights.copy()
-                        best_metrics = metrics.copy()
+                            tested += 1
+                            if score > best_score:
+                                best_score = score
+                                best_weights = weights.copy()
+                                best_metrics = metrics.copy()
 
     if verbose and best_weights:
         print(f"\nTested {tested} weight combinations")
