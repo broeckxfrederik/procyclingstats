@@ -263,7 +263,7 @@ CLASSICS_METADATA = {
         "typical_distance": 200,
         "month": 3,
         "name": "Omloop Het Nieuwsblad",
-        "sprint_finish_prob": 0.15,
+        "sprint_finish_prob": 0.55,
         "climbing_difficulty": 0.35,
         "uphill_finish_prob": 0.15,
         "cobble_difficulty": 0.5,
